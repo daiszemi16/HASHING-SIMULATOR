@@ -1,0 +1,536 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" /> <!-- Charset for webpage -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" /> <!-- Responsive viewport -->
+    <title>Hashing Simulator - Store 10 Numbers in Size 15 Array</title> <!-- Title of webpage -->
+    <style>
+      /* CSS Variables for colors used throughout */
+      :root {
+        --primary-color: #4f46e5;
+        --secondary-color: #a5b4fc;
+        --accent-color: #f59e0b;
+        --bg-color: #f9fafb;
+        --text-color: #111827;
+        --slot-border: #cbd5e1;
+        --highlight-color: #a78bfa;
+        --collision-color: #ef4444;
+        --found-color: #22c55e;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Set font */
+        margin: 0;
+        padding: 0;
+        background: var(--bg-color); /* Background color */
+        color: var(--text-color); /* Text color */
+        display: flex;
+        justify-content: center; /* Center content horizontally */
+        padding: 20px;
+        min-height: 100vh; /* Full viewport height */
+        box-sizing: border-box;
+      }
+      main {
+        max-width: 900px; /* Max width for main container */
+        width: 100%;
+        background: white; /* White background */
+        border-radius: 12px; /* Rounded corners */
+        box-shadow: 0 8px 24px rgb(0 0 0 / 0.1); /* Shadow */
+        padding: 30px 35px;
+        display: flex;
+        flex-direction: column;
+        gap: 30px; /* Space between children */
+      }
+      h1 {
+        text-align: center; /* Center heading */
+        color: var(--primary-color);
+        margin-bottom: 0;
+        user-select: none; /* Disable text selection */
+      }
+      .instructions {
+        font-size: 16px;
+        color: var(--secondary-color);
+        margin-top: 5px;
+        text-align: center;
+        user-select: none;
+      }
+      label {
+        font-weight: 600;
+        margin-right: 8px;
+      }
+      input[type="number"] {
+        width: 100px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 2px solid var(--slot-border);
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+      }
+      input[type="number"]:focus {
+        outline: none;
+        border-color: var(--primary-color); /* Highlight on focus */
+      }
+      select {
+        font-size: 16px;
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 2px solid var(--slot-border);
+        transition: border-color 0.3s ease;
+        cursor: pointer;
+      }
+      select:focus {
+        outline: none;
+        border-color: var(--primary-color); /* Highlight on focus */
+      }
+      button {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 700;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        cursor: pointer;
+        font-size: 16px;
+        user-select: none;
+        transition: background-color 0.3s ease;
+      }
+      button:hover:not(:disabled) {
+        background-color: #3730a3; /* Darker background on hover */
+      }
+      button:disabled {
+        background-color: var(--secondary-color);
+        cursor: not-allowed; /* Disabled cursor */
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+      }
+      .array-container {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        justify-content: center;
+        user-select: none;
+      }
+      .array-slot {
+        width: 50px;
+        height: 50px;
+        border: 2px solid var(--slot-border);
+        border-radius: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 700;
+        font-size: 18px;
+        background: white;
+        position: relative;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+      }
+      .array-slot.index-label {
+        font-size: 12px;
+        color: var(--secondary-color);
+        position: absolute;
+        top: 3px;
+        right: 6px;
+        user-select: none;
+        font-weight: 500;
+      }
+      .array-slot.occupied {
+        background-color: var(--accent-color);
+        color: white;
+        border-color: #b45309;
+      }
+      .array-slot.highlight-hash {
+        background-color: var(--highlight-color);
+        color: white;
+        border-color: #5b21b6;
+      }
+      .array-slot.highlight-collision {
+        background-color: var(--collision-color);
+        color: white;
+        border-color: #991b1b;
+      }
+      .array-slot.highlight-found {
+        background-color: var(--found-color);
+        color: white;
+        border-color: #166534;
+      }
+      .array-slot.highlight-binary-found {
+        background: linear-gradient(
+          135deg,
+          #f97316,
+          #22c55e
+        );
+        color: white;
+        border-color: #16a34a;
+      }
+      .section-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 12px;
+        user-select: none;
+      }
+      .info-text {
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-top: -5px;
+        user-select: none;
+        min-height: 24px;
+      }
+      .search-result {
+        padding: 14px;
+        background-color: #e0e7ff;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 16px;
+        user-select: none;
+        min-height: 36px;
+        margin-top: 6px;
+      }
+      footer {
+        text-align: center;
+        color: var(--secondary-color);
+        font-size: 14px;
+        user-select: none;
+        margin-top: 40px;
+      }
+      @media (max-width: 600px) {
+        .array-slot {
+          width: 40px;
+          height: 40px;
+          font-size: 16px;
+        }
+        input[type="number"] {
+          width: 80px;
+        }
+        button {
+          padding: 10px 18px;
+          font-size: 14px;
+        }
+        select {
+          font-size: 14px;
+          padding: 6px 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Hashing Simulator</h1> <!-- Page title -->
+      <div class="instructions">
+        Insert up to 10 numbers. They will be stored in a hash table of size 15
+        with collisions handled by linear probing.
+      </div>
+
+      <section>
+        <div class="section-title">Insert a Number</div> <!-- Insert section header -->
+        <div class="row">
+          <label for="number-input">Number:</label> <!-- Label for number input -->
+          <input type="number" id="number-input" step="1" min="0" /> <!-- Number input -->
+          <select id="probing-method" title="Select Probing Method">
+            <option value="linear">Linear Probing</option>    <!-- Linear probing option -->
+            <option value="quadratic">Quadratic Probing</option>  <!-- Quadratic probing option -->
+          </select>
+          <button id="insert-btn" disabled>Insert</button> <!-- Insert button, initially disabled -->
+        </div>
+        <div class="info-text" id="insert-info">Numbers inserted: 0 / 10</div> <!-- Info about inserted count -->
+      </section>
+
+      <section>
+        <div class="section-title">Hash Table (Size 15)</div> <!-- Hash table display title -->
+        <div
+          class="array-container"
+          id="array-container"
+          aria-label="Hash table array slots"
+        >
+          <!-- Array slots will be rendered here -->
+        </div>
+        <div
+          class="info-text"
+          id="last-insert-info"
+          style="margin-top: 8px"
+        ></div> <!-- Last insertion status -->
+      </section>
+
+      <section>
+        <div class="section-title">Search a Number</div> <!-- Search section title -->
+        <div class="row" style="gap: 12px">
+          <label for="search-number-input">Number:</label> <!-- Label for search input -->
+          <input type="number" id="search-number-input" step="1" min="0" />  <!-- Search input -->
+        </div>
+        <div class="row" style="gap: 18px; margin-top: 12px; flex-wrap: wrap">
+          <button id="linear-search-btn" disabled>Linear Search</button> <!-- Linear search button -->
+          <button id="binary-search-btn" disabled>Binary Search</button> <!-- Binary search button -->
+        </div>
+        <div class="search-result" id="search-result">
+          Search results will appear here.
+        </div> <!-- Search result display -->
+      </section>
+    </main>
+
+    <footer>Made for interactive hashing and search simulation 🧑‍💻</footer> <!-- Footer -->
+
+    <script>
+      (() => {
+        const MAX_INPUTS = 10; // Maximum numbers allowed to insert
+        const ARRAY_SIZE = 15; // Hash table size
+
+        let hashTable = new Array(ARRAY_SIZE).fill(null); // Initialize hash table with nulls
+        let insertedCount = 0; // Number of inserted elements
+        const insertedNumbers = []; // Array to hold inserted numbers for binary search
+
+        // Reference DOM elements for ease of access
+        const numberInput = document.getElementById("number-input");
+        const insertBtn = document.getElementById("insert-btn");
+        const insertInfo = document.getElementById("insert-info");
+        const lastInsertInfo = document.getElementById("last-insert-info");
+        const probingMethodSelect = document.getElementById("probing-method");
+
+        const arrayContainer = document.getElementById("array-container");
+        const searchNumberInput = document.getElementById("search-number-input");
+        const linearSearchBtn = document.getElementById("linear-search-btn");
+        const binarySearchBtn = document.getElementById("binary-search-btn");
+        const searchResult = document.getElementById("search-result");
+
+        // Enable or disable Insert button based on validity of number input and count limit
+        function updateInsertBtn() {
+          const val = numberInput.value.trim(); // Get trimmed input value
+          const num = Number(val); // Convert to number
+          // Disable if input is empty, not a number, not integer, negative, or max inputs reached
+          insertBtn.disabled =
+            val === "" ||
+            isNaN(num) ||
+            !Number.isInteger(num) ||
+            num < 0 ||
+            insertedCount >= MAX_INPUTS;
+        }
+
+        // Enable or disable search buttons based on validity of search input and if any numbers inserted
+        function updateSearchButtons() {
+          const val = searchNumberInput.value.trim();
+          const num = Number(val);
+          const hasItems = insertedCount > 0;
+
+          const validInput =
+            val !== "" && !isNaN(num) && Number.isInteger(num) && num >= 0;
+          linearSearchBtn.disabled = !validInput || !hasItems;
+          binarySearchBtn.disabled = !validInput || !hasItems;
+        }
+
+        // Render the hash table slots with highlights for hash index, inserted index, collisions, and found indices
+        function renderHashTable(highlights = {}) {
+          const {
+            hashedIndex = -1,
+            insertedIndex = -1,
+            foundIndices = [],
+            collisionIndices = [],
+          } = highlights;
+
+          arrayContainer.innerHTML = ""; // Clear previous rendering
+
+          for (let i = 0; i < ARRAY_SIZE; i++) {
+            const slot = document.createElement("div"); // Create a div for slot
+            slot.classList.add("array-slot"); // Add common slot styling
+
+            // Create index label in corner
+            const idxLabel = document.createElement("div");
+            idxLabel.classList.add("index-label");
+            idxLabel.textContent = i;
+            slot.appendChild(idxLabel);
+
+            if (hashTable[i] !== null) {
+              slot.textContent = hashTable[i]; // Display number
+              slot.classList.add("occupied"); // Occupied styling
+            } else {
+              slot.textContent = ""; // Empty slot
+            }
+
+            // Highlight the hashed index slot
+            if (i === hashedIndex) {
+              slot.classList.add("highlight-hash");
+            }
+            // Highlight the inserted index slot
+            if (i === insertedIndex) {
+              slot.classList.add("highlight-found");
+            }
+            // Highlight collision slots
+            if (collisionIndices.includes(i)) {
+              slot.classList.add("highlight-collision");
+            }
+            // Highlight found slots from binary search
+            if (foundIndices.length && foundIndices.includes(i)) {
+              slot.classList.add("highlight-binary-found");
+            }
+
+            arrayContainer.appendChild(slot); // Append slot to container
+          }
+        }
+
+        // Simple modulo hash function
+        function hashFunc(num) {
+          return num % ARRAY_SIZE;
+        }
+
+        // Insert number using selected probing method (linear/quadratic)
+        function insertNumber(num) {
+          const baseIndex = hashFunc(num); // Calculate hash index
+          let index = baseIndex;
+          let collisionIndices = [];
+          const probingMethod = probingMethodSelect.value; // Get chosen probing method
+
+          for (let i = 0; i < ARRAY_SIZE; i++) {
+            if (hashTable[index] === null) {
+              hashTable[index] = num; // Insert number here
+              return { insertedIndex: index, collisionIndices }; // Return insertion info
+            } else {
+              collisionIndices.push(index); // Collision found, track index
+              if (probingMethod === "linear") {
+                index = (index + 1) % ARRAY_SIZE; // Linear probing increments
+              } else if (probingMethod === "quadratic") {
+                index = (baseIndex + i * i) % ARRAY_SIZE; // Quadratic probing increments
+              }
+            }
+          }
+          // Return null if table full
+          return null;
+        }
+
+        // Linear search for a number in hash table
+        function linearSearch(num) {
+          for (let i = 0; i < ARRAY_SIZE; i++) {
+            if (hashTable[i] === num) return i; // Return index if found
+          }
+          return -1; // Not found
+        }
+
+        // Binary search on sorted insertedNumbers array
+        function binarySearch(arr, num) {
+          let left = 0,
+            right = arr.length - 1;
+
+          while (left <= right) {
+            let mid = Math.floor((left + right) / 2);
+            if (arr[mid] === num) return mid; // Found at mid
+            else if (arr[mid] < num) left = mid + 1; // Search right half
+            else right = mid - 1; // Search left half
+          }
+          return -1; // Not found
+        }
+
+        // Add input event listener on number input to update Insert button state
+        numberInput.addEventListener("input", () => {
+          updateInsertBtn();
+        });
+
+        // Insert button handler to insert number into hash table
+        insertBtn.addEventListener("click", () => {
+          const val = numberInput.value.trim();
+          const num = Number(val);
+
+          if (isNaN(num) || !Number.isInteger(num) || num < 0) return; // Validate input
+          if (insertedCount >= MAX_INPUTS) return; // Max inputs reached
+
+          // Check if number is already inserted in table
+          if (hashTable.includes(num)) {
+            lastInsertInfo.textContent = `Number ${num} is already inserted!`;
+            numberInput.value = "";
+            updateInsertBtn();
+            updateSearchButtons();
+            return;
+          }
+
+          const insertionResult = insertNumber(num); // Insert with selected probing
+          if (insertionResult === null) {
+            lastInsertInfo.textContent =
+              "Hash table is full. Cannot insert more numbers.";
+            return;
+          }
+
+          insertedCount++; // Increment inserted count
+          insertedNumbers.push(num); // Add to list for binary search
+          insertedNumbers.sort((a, b) => a - b); // Keep sorted
+
+          // Show insertion info with collisions indices if any
+          lastInsertInfo.textContent = `Inserted number ${num} at index ${
+            insertionResult.insertedIndex
+          }. Collisions at indices: ${
+            insertionResult.collisionIndices.length > 0
+              ? insertionResult.collisionIndices.join(", ")
+              : "none"
+          }.`;
+          insertInfo.textContent = `Numbers inserted: ${insertedCount} / ${MAX_INPUTS}`; // Update count display
+          numberInput.value = ""; // Clear input
+          updateInsertBtn();
+          updateSearchButtons();
+
+          // Render updated hash table with highlights
+          renderHashTable({
+            hashedIndex: hashFunc(num),
+            insertedIndex: insertionResult.insertedIndex,
+            collisionIndices: insertionResult.collisionIndices,
+          });
+          searchResult.textContent = "Search results will appear here."; // Reset search results display
+        });
+
+        // Search number input event updates search button states and clears search results
+        searchNumberInput.addEventListener("input", () => {
+          updateSearchButtons();
+          searchResult.textContent = "Search results will appear here."; // Clear
+          renderHashTable(); // Reset highlights
+        });
+
+        // Linear search button click handler
+        linearSearchBtn.addEventListener("click", () => {
+          const val = searchNumberInput.value.trim();
+          const num = Number(val);
+          if (isNaN(num) || !Number.isInteger(num) || num < 0) return;
+
+          const foundIndex = linearSearch(num);
+          if (foundIndex !== -1) {
+            searchResult.textContent = `Linear Search: Number ${num} found at hash table index ${foundIndex}.`;
+            renderHashTable({ foundIndices: [foundIndex] }); // Highlight found
+          } else {
+            searchResult.textContent = `Linear Search: Number ${num} not found in the hash table.`;
+            renderHashTable(); // No highlight
+          }
+        });
+
+        // Binary search button click handler
+        binarySearchBtn.addEventListener("click", () => {
+          const val = searchNumberInput.value.trim();
+          const num = Number(val);
+          if (isNaN(num) || !Number.isInteger(num) || num < 0) return;
+
+          const idx = binarySearch(insertedNumbers, num);
+          if (idx !== -1) {
+            searchResult.textContent = `Binary Search: Number ${num} found in sorted inserted list at position ${idx} (0-based).`;
+
+            // Find all hash table indices containing number for highlight
+            const foundIndices = [];
+            for (let i = 0; i < ARRAY_SIZE; i++) {
+              if (hashTable[i] === num) {
+                foundIndices.push(i);
+              }
+            }
+            renderHashTable({ foundIndices });
+          } else {
+            searchResult.textContent = `Binary Search: Number ${num} not found in the inserted list.`;
+            renderHashTable(); // No highlight
+          }
+        });
+
+        // Initial rendering and button state setup
+        renderHashTable();
+        updateInsertBtn();
+        updateSearchButtons();
+      })();
+    </script>
+  </body>
+</html>
+
+
+
